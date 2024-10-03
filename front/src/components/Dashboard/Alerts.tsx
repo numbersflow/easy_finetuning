@@ -26,6 +26,13 @@ const alerts = [
   }
 ]
 
+const alertStyles = {
+  info: "bg-green-100 border-green-300 text-green-800",
+  warning: "bg-yellow-100 border-yellow-300 text-yellow-800",
+  error: "bg-red-100 border-red-300 text-red-800",
+  default: "bg-gray-100 border-gray-300 text-gray-800"
+}
+
 export const Alerts: React.FC = () => {
   return (
     <Card className="h-[300px] flex flex-col">
@@ -35,7 +42,11 @@ export const Alerts: React.FC = () => {
       <CardContent className="flex-grow overflow-auto">
         <div className="space-y-2">
           {alerts.map((alert) => (
-            <Alert key={alert.id} variant={alert.type as "default" | "destructive" | "warning" | "info"}>
+            <Alert 
+              key={alert.id} 
+              variant="default"
+              className={`${alertStyles[alert.type as keyof typeof alertStyles] || alertStyles.default} border`}
+            >
               <AlertTitle>{alert.title}</AlertTitle>
               <AlertDescription>
                 <div>{alert.description}</div>

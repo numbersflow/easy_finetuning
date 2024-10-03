@@ -1,11 +1,27 @@
 import React, { useState, useCallback, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
+import { Checkbox } from "../ui/checkbox"
+import { Label } from "../ui/label"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { trainingData } from './dashboardData'
+import { trainingData, modelComparisonData } from './dashboardData'
+
+const generateColor = (str: string) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xFF;
+    color += ('00' + value.toString(16)).substr(-2);
+  }
+  return color;
+}
 
 export const TrainingProgress: React.FC = () => {
   const [startIndex, setStartIndex] = useState(0)
   const [endIndex, setEndIndex] = useState(trainingData.length - 1)
+  const [selectedModels, setSelectedModels] = useState<string[]>([])
   const chartRef = useRef<HTMLDivElement>(null)
 
   const handleWheel = useCallback((event: WheelEvent) => {
@@ -41,29 +57,89 @@ export const TrainingProgress: React.FC = () => {
   }, [handleWheel])
 
   const visibleData = trainingData.slice(startIndex, endIndex + 1)
+  const visibleComparisonData = modelComparisonData.slice(startIndex, endIndex + 1)
+
+  const combinedData = visibleData.map((item, index) => {
+    const comparisonItem = visibleComparisonData[index]
+    const additionalData = selectedModels.reduce((acc, model) => {
+      if (comparisonItem) {
+        acc[`${model}_loss`] = comparisonItem[`${model}_loss`]
+        acc[`${model}_eval_loss`] = comparisonItem[`${model}_eval_loss`]
+      }
+      return acc
+    }, {} as Record<string, number>)
+    return { ...item, ...additionalData }
+  })
+
+  const handleModelToggle = (model: string) => {
+    setSelectedModels(prev => 
+      prev.includes(model) 
+        ? prev.filter(m => m !== model)
+        : [...prev, model]
+    )
+  }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Training Progress</CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px] relative">
-        <div className="absolute top-2 right-2 text-xs text-gray-500">
-          Use mouse wheel to zoom
+      <CardContent className="flex flex-col md:flex-row">
+        <div className="w-full md:w-1/4 mb-4 md:mb-0 md:pr-4">
+          <h3 className="text-lg font-semibold mb-2">Compare Models</h3>
+          {Object.keys(modelComparisonData[0])
+            .filter(key => key !== 'epoch')
+            .map(key => key.split('_')[0])
+            .filter((value, index, self) => self.indexOf(value) === index)
+            .map((model) => (
+            <div key={model} className="flex items-center space-x-2 mb-2">
+              <Checkbox
+                id={`model-${model}`}
+                checked={selectedModels.includes(model)}
+                onCheckedChange={() => handleModelToggle(model)}
+              />
+              <Label
+                htmlFor={`model-${model}`}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Model {model.toUpperCase()}
+              </Label>
+            </div>
+          ))}
         </div>
-        <div ref={chartRef} className="absolute inset-0 overflow-hidden">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={visibleData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="epoch" />
-              <YAxis yAxisId="left" />
-              <YAxis yAxisId="right" orientation="right" />
-              <Tooltip />
-              <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="loss" stroke="#8884d8" name="Loss" />
-              <Line yAxisId="right" type="monotone" dataKey="accuracy" stroke="#82ca9d" name="Accuracy" />
-            </LineChart>
-          </ResponsiveContainer>
+        <div className="w-full md:w-3/4 h-[300px] relative">
+          <div className="absolute top-2 right-2 text-xs text-gray-500">
+            Use mouse wheel to zoom
+          </div>
+          <div ref={chartRef} className="absolute inset-0 overflow-hidden">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={combinedData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="epoch" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="loss" stroke="#8884d8" name="Current Loss" />
+                <Line type="monotone" dataKey="eval_loss" stroke="#82ca9d" name="Current Eval Loss" />
+                {selectedModels.flatMap((model) => [
+                  <Line
+                    key={`${model}_loss`}
+                    type="monotone"
+                    dataKey={`${model}_loss`}
+                    stroke={generateColor(`${model}_loss`)}
+                    name={`${model.toUpperCase()} Loss`}
+                  />,
+                  <Line
+                    key={`${model}_eval_loss`}
+                    type="monotone"
+                    dataKey={`${model}_eval_loss`}
+                    stroke={generateColor(`${model}_eval_loss`)}
+                    name={`${model.toUpperCase()} Eval Loss`}
+                  />
+                ])}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </CardContent>
     </Card>

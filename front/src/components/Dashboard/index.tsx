@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { CurrentTraining } from './CurrentTraining'
-import { QuickStats } from './QuickStats'
+import { GPUInfo } from './GPUInfo'
 import { RecentActivities } from './RecentActivities'
 import { TrainingProgress } from './TrainingProgress'
 import { ResourceUsage } from './ResourceUsage'
@@ -16,7 +16,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       <CurrentTraining isTraining={isTraining} />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <QuickStats />
+        <GPUInfo />
         <LearningRateSchedule />
         <RecentActivities />
         <Alerts />
