@@ -6,7 +6,6 @@ import { ChatInterface } from './ChatInterface'
 import { InferenceSettings } from './InferenceSettings'
 import { PerformanceMonitoring } from './PerformanceMonitoring'
 import { ModelConfiguration } from './ModelConfiguration'
-import { ModelPerformanceComparison } from './ModelPerformanceComparison'
 
 export default function ModelConfig() {
   const [isModelLoaded, setIsModelLoaded] = useState(false)
@@ -32,7 +31,6 @@ export default function ModelConfig() {
       </div>
       <PerformanceMonitoring disabled={!isModelLoaded || isLoading} />
       <ModelConfiguration disabled={!isModelLoaded || isLoading} />
-      <ModelPerformanceComparison />
     </div>
   )
 }
