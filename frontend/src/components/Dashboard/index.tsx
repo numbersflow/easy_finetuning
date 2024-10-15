@@ -6,7 +6,7 @@ import { TrainingProgress } from './TrainingProgress'
 import { ResourceUsage } from './ResourceUsage'
 import { PerformanceMetrics } from './PerformanceMetrics'
 import ModelComparison from './ModelComparison'
-import { LearningRateSchedule } from './LearningRateSchedule'
+import { CompactCalendar } from './CompactCalendar'
 import { Alerts } from './Alerts'
 
 export default function Dashboard() {
@@ -17,13 +17,13 @@ export default function Dashboard() {
       <CurrentTraining isTraining={isTraining} />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <GPUInfo />
-        <LearningRateSchedule />
-        <RecentActivities />
+        <ResourceUsage />
+        <CompactCalendar />
         <Alerts />
       </div>
       <TrainingProgress />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ResourceUsage />
+        <RecentActivities />
         <PerformanceMetrics />
       </div>
       <div className="mt-6">

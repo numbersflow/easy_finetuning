@@ -3,12 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 
 export const ResourceUsage: React.FC = () => {
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle>Resource Usage</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="flex flex-col h-full">
+        <div className="space-y-4 flex-grow">
           <div>
             <div className="flex justify-between mb-1">
               <span>GPU: 80%</span>
